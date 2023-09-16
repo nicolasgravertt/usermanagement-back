@@ -1,7 +1,7 @@
-import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
+const { MongoClient, ObjectId, ServerApiVersion } = require("mongodb");
 const { getClient } = require("../db/mongoDB");
 
-export class UserModel {
+class UserModel {
   static async getAll({}) {
     const client = getClient();
     const collection = client.db("<UserManagement>").collection("<user>");
@@ -52,3 +52,5 @@ export class UserModel {
     return value;
   }
 }
+
+module.exports = { UserModel };

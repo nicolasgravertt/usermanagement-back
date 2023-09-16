@@ -1,10 +1,6 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { getClient } = require("../db/mongoDB");
-
-const client = getClient();
-const collection = client.db("<UserManagement>").collection("<user>");
 
 const handleLogin = async (req, res) => {
   const { user, pwd } = req.body;
@@ -12,7 +8,12 @@ const handleLogin = async (req, res) => {
     return res
       .status(400)
       .json({ message: "Username and password are required." });
-  const foundUser = collection.find((person) => person.username === user);
+
+  const db = req.dbClient.db("UserManagement");
+  const collection = db.collection("User");
+
+  const [foundUser] = await collection.find({ username: user }).toArray();
+
   if (!foundUser) return res.sendStatus(401); //Unauthorized
   // evaluate password
   const match = await bcrypt.compare(pwd, foundUser.password);
@@ -31,7 +32,7 @@ const handleLogin = async (req, res) => {
     // Saving refreshToken with current user
     collection.findOneAndUpdate(
       { username: foundUser.username },
-      { $set: refreshToken },
+      { $set: { refreshToken } },
       { returnNewDocument: true }
     );
     res.cookie("jwt", refreshToken, {

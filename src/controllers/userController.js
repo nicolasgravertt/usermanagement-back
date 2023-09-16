@@ -1,6 +1,6 @@
-import { validateUser, validatePartialUser } from "../schemas/user.js";
+const { validateUser, validatePartialUser } = require("../schemas/user");
 
-export class UserController {
+class UserController {
   constructor({ userModel }) {
     this.userModel = userModel;
   }
@@ -59,3 +59,5 @@ export class UserController {
     return res.json(updatedUser);
   };
 }
+
+module.exports = UserController;

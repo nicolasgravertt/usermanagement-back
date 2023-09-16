@@ -1,16 +1,15 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const { getClient } = require("../db/mongoDB");
-
-const client = getClient();
-const collection = client.db("<UserManagement>").collection("<user>");
 
 const handleRefreshToken = (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(401);
   const refreshToken = cookies.jwt;
 
-  const foundUser = collection.find({ refreshToken });
+  const db = req.dbClient.db("UserManagement");
+  const collection = db.collection("User");
+
+  const [foundUser] = collection.find({ refreshToken: refreshToken }).toArray();
   if (!foundUser) return res.sendStatus(403); //Forbidden
   // evaluate jwt
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {

@@ -1,17 +1,18 @@
 const bcrypt = require("bcrypt");
-const { getClient } = require("../db/mongoDB");
-
-const client = getClient();
-const collection = client.db("<UserManagement>").collection("<user>");
 
 const handleNewUser = async (req, res) => {
   const { user, pwd } = req.body;
+
   if (!user || !pwd)
     return res
       .status(400)
       .json({ message: "Username and password are required." });
+
+  const db = req.dbClient.db("UserManagement");
+  const collection = db.collection("User");
   // check for duplicate usernames in the db
-  const duplicate = collection.find((person) => person.username === user);
+  const [duplicate] = await collection.find({ username: user }).toArray();
+
   if (duplicate) return res.sendStatus(409); //Conflict
   try {
     //encrypt the password

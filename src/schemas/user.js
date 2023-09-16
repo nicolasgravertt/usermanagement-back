@@ -1,4 +1,4 @@
-import z from "zod";
+const z = require("zod");
 
 const movieSchema = z.object({
   username: z.string({
@@ -17,10 +17,12 @@ const movieSchema = z.object({
   }),
 });
 
-export function validateUser(input) {
+function validateUser(input) {
   return movieSchema.safeParse(input);
 }
 
-export function validatePartialUser(input) {
+function validatePartialUser(input) {
   return movieSchema.partial().safeParse(input);
 }
+
+module.exports = { validatePartialUser, validateUser };

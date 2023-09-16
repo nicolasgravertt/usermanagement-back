@@ -8,11 +8,15 @@ const errorHandler = require("./src/middleware/errorHandler");
 const verifyJWT = require("./src/middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./src/middleware/credentials");
-const { connectToDatabase } = require("./src/db/mongoDB");
+const openConnection = require("./src/middleware/openConnection");
+const closeConnection = require("./src/middleware/closeConnection");
 const PORT = process.env.PORT || 3500;
 
-// Connect to database
-connectToDatabase();
+// rutas
+const { createUserRouter } = require("./src/routes/api/users");
+
+//modelos
+const { UserModel } = require("./src/model/user");
 
 // custom middleware logger
 app.use(logger);
@@ -33,6 +37,9 @@ app.use(express.json());
 //middleware for cookies
 app.use(cookieParser());
 
+// Connect to database
+app.use(openConnection);
+
 // routes
 app.use("/", require("./src/routes/root"));
 app.use("/register", require("./src/routes/register"));
@@ -41,7 +48,10 @@ app.use("/refresh", require("./src/routes/refresh"));
 app.use("/logout", require("./src/routes/logout"));
 
 app.use(verifyJWT);
-// app.use("/users", require("./src/routes/api/users"));
+app.use("/users", createUserRouter(UserModel));
+
+// Close Connection
+app.use(closeConnection);
 
 app.all("*", (req, res) => {
   res.status(404);
